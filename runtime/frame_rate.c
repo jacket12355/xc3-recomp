@@ -271,11 +271,11 @@ static void world_clock(double dt, double step) {
     atomic_store_explicit(&world_us, w + (int64_t)(step * 1e6 + 0.5), memory_order_relaxed);
 }
 
-// Cutscenes and the title menus run at 30 fps, as on the console: their animation advances per frame, so at 120 fps a
-// cutscene ran ahead of its voices. The step update's object (main+0xf3c0, its address stored to the patch page's +0x70
-// by the realtime site at main+0xf3dc) has bit 2 of +0x1fc set while the game takes a fixed step instead of the
-// measured one: the title menus and every cutscene, clear in play. While it is set the step is 1/30 s, the frame rate
-// 30, the vsync count 2 and the pacer holds 30 fps. XC3_CUTSCENE_30=0 keeps the limit.
+// Cutscenes, in-engine events and the title menus run at 30 fps, as on the console: their animation advances per
+// frame, so at 120 fps a cutscene ran ahead of its voices. The step update's object (main+0xf3c0, its address stored
+// to the patch page's +0x70 by the realtime site at main+0xf3dc) has bit 2 of +0x1fc set while the game takes a fixed
+// step instead of the measured one: the title menus and every cutscene, clear in play. While it is set the step is
+// 1/30 s, the frame rate 30, the vsync count 2 and the pacer holds 30 fps. XC3_CUTSCENE_30=0 keeps the limit.
 static int cut_on = -1;
 
 static int cutscene(void) {
@@ -285,6 +285,15 @@ static int cutscene(void) {
     uint32_t flags = 0;
     memcpy(&obj, (uint8_t *)rt_patch_page() + 0x70, 8);
     if (obj && plat_mem_read(obj + 0x1fc, &flags, 4) && (flags & 4)) return 1;
+    // An in-engine event playing: the event player's loop stores the player to the page's +0x78 once a frame
+    // (patches-upd.txt realtime, main+0x334a34), and taking it back here counts the presents since. Some events set
+    // neither the flag above nor the play report's id below, and the camera on the three soldiers before the first
+    // battle of a new game waited for good with a step shorter than about 1/45 s (issues 36, 84, 85). Held for 4
+    // presents, so an update that lands on either side of a present does not drop the hold for a frame.
+    static unsigned since_event = 1000;
+    uint64_t player = __atomic_exchange_n((uint64_t *)((uint8_t *)rt_patch_page() + 0x78), 0, __ATOMIC_ACQ_REL);
+    since_event = player ? 0 : since_event < 1000 ? since_event + 1 : since_event;
+    if (since_event < 4) return 1;
     // A story event playing: the play report's object (*[*main+0x1b4d688], read in main+0x325708, as Lucky7's
     // runtime/hle/xc2.c xc3_event_tour reads it) holds the event's id at +0x1e0 until the event ends. Events between
     // cutscenes (fades, staged moves) step without the fixed-step flag; at 120 fps the end of event 10005 waited for
@@ -301,7 +310,7 @@ void frame_step_present(uint64_t display_ns, int interval) {
     if (cut != cut_now) {
         cut_now = cut;
         sample_count = sample_next = 0;   // the average starts again at the new rate
-        rt_log("frame rate: %s", cut ? "cutscene, story event or title menu, 30 fps" : "play, the limit again");
+        rt_log("frame rate: %s", cut ? "cutscene, event or title menu, 30 fps" : "play, the limit again");
     }
     if (vsyncs_word) vsyncs_store();
     double step = 0, dt = last_ns ? (double)(display_ns - last_ns) * 1e-9 : 0;
