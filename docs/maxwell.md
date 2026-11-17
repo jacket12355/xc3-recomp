@@ -229,6 +229,12 @@ Grep-level look on 2026-10-22, statuses updated 2026-10-26; "saw" is what the gr
     correctly as they are; that drew black streaks through the canopy (Windstrong Bluffs, jump 574, and the title
     screen after Future Redeemed on the RX 6600 of #45). Only streams with 32-bit components are realigned now. D24 (check 4) was looked at for the
     same issues and does not apply.
+23. **Storage image format.** SULD/SUST read and write texel bits as the instruction's format says, not the texture's.
+    The sand footprint decal reads the A2B10G10R10 G-buffer normal target through an R32UI image and unpacks it itself;
+    a storage view in the target's own format made that load undefined, and the decal wrote garbage normals over its
+    whole quad (dark squares on NVIDIA, issue #39). `vk_exec_draw.c` `storage_view_format` now gives the view the
+    shader's declared format when its texel size matches and it supports storage (images are MUTABLE_FORMAT).
+    **Fixed.**
 
 ## 8. Sources not read yet
 
