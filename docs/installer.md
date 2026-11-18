@@ -33,6 +33,22 @@ The install folder (`main.c` `portable_paths()` reads this layout; it stays port
 into the exe at build time has some (a developer build copied into an install folder): the log says so and how to move
 them.
 
+### Game command line
+
+For launchers and shortcuts, `xc3[.exe]` takes these before any mode (`runtime/main.c` `launcher_args`); `--help`
+prints them:
+
+| Option | Effect |
+|---|---|
+| `--set KEY=VALUE` | one setting for this run, repeatable. `KEY` is any `xc3.ini` key (any case, `XC3_` optional); it becomes the environment variable `XC3_KEY`, which wins over `xc3.ini` and is never saved into it. An unknown key prints a warning |
+| `--config FILE` | read and save this settings file instead of `xc3.ini` beside the exe |
+| `--game DIR` | `DIR/exefs`, `DIR/romfs` and `DIR/profile` at once; a later `--exefs`, `--romfs` or `--profile` wins |
+| `--fullscreen` | `--set fullscreen=1` |
+| `--window WxH` | `--set window_size=WxH --set fullscreen=0` |
+| `--exefs DIR`, `--romfs DIR`, `--profile DIR` | one folder each |
+
+Every setting also has an environment variable (`XC3_<KEY>`), which wins over `xc3.ini` the same way.
+
 ## Updating the port
 
 The player runs a newer installer on the same folder. It reads `xc3-install.json`, keeps `romfs/`, `exefs/`,
