@@ -120,7 +120,9 @@ xc3.ini.example, VERSION  the default ini; the release string (the repository's 
 
 `tools/make_release_linux.py` builds the same setup for Linux and packs it as `XC3-Setup-<version>-linux.AppImage` (the static
 type-2 runtime: no libfuse2 needed on the host). The player makes it executable and starts it; on a Steam Deck, from
-Desktop Mode. Building the release also needs `make` and `pkg-config`. The bundled Tcl/Tk 9.0.4 is rebuilt with
+Desktop Mode. The same folder also ships as `XC3-Setup-<version>-linux.tar.gz` (one top folder, `XC3-Setup-linux/`) for
+launchers and players who unpack instead of mounting: `XC3-Setup-linux/AppRun` starts the same window from wherever
+it was unpacked. Building the release also needs `make` and `pkg-config`. The bundled Tcl/Tk 9.0.4 is rebuilt with
 Xft against the sniper sysroot so Russian text uses system TrueType fonts. The setup builds the game into the folder they pick, as on Windows, and the game is `xc3` there with
 `libSDL3.so.0` beside it. The folder inside the AppImage:
 
@@ -157,7 +159,8 @@ bin/                  xc3_xlate, hactool, ninja, libSDL3.so.0
 `MOD_MAIN_BASE`, all the runtime reads of the module layout, from `tools/runtime-layout/layout.h`; nothing game-derived
 reaches a runner or a package.
 
-Each run builds `XC3-Setup-<version>-windows.zip` on Windows and `XC3-Setup-<version>-linux.AppImage` on Linux, with
+Each run builds `XC3-Setup-<version>-windows.zip` on Windows and `XC3-Setup-<version>-linux.AppImage` plus
+`XC3-Setup-<version>-linux.tar.gz` on Linux, with
 `check_content`, the check-only installer pass and the window's `--selftest` inside `tools/make_release.py` and
 `tools/make_release_linux.py`. Runners have no GPU, so the host check runs on Mesa's CPU Vulkan driver
 (`.github/actions/software-vulkan`). A second runner then unpacks each package and repeats those checks
