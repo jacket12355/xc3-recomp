@@ -164,7 +164,12 @@ bin/                  xc3_xlate, hactool, ninja, libSDL3.so.0
 - The setup's temp folder is `.setup-temp` inside the install folder (`--temp` changes it): the AppImage is mounted
   read-only, and a Steam Deck's `/home` is often too full for the generated C while the game goes to the SD card.
 - The game keeps Mesa's shader cache in `mesa-cache` beside `xc3` unless `MESA_SHADER_CACHE_DIR` is set, for the
-  same reason: RADV fills its default folder in `~/.cache` up to 1 GB.
+  same reason: RADV fills its default folder in `~/.cache` up to 1 GB. NVIDIA's driver cache goes to `nv-cache` beside
+  `xc3` the same way (`__GL_SHADER_DISK_CACHE_PATH`, with `__GL_SHADER_DISK_CACHE_SKIP_CLEANUP=1`) unless the player
+  set `__GL_SHADER_DISK_CACHE_PATH`. Everything the game writes then stays in the install folder.
+- The one known exception is NVIDIA's driver on Windows, which reads no such variable: its shader cache stays under
+  `%LOCALAPPDATA%\NVIDIA` (`DXCache`, `GLCache`), and the setup's prepare step fills it there. Deleting the install
+  folder leaves that cache behind; the driver trims it on its own.
 - The window follows `LANG` for English or Russian, cancels through SIGTERM to the CLI's process group (the CLI handles
   it as Ctrl+Break on Windows) and opens the finished folder with `xdg-open`.
 - Requirements beyond Windows': Linux 6.7 or later (the write watch, `docs/building.md`) and glibc 2.34.
