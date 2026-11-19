@@ -27,6 +27,8 @@ Report problems as issues, following [CONTRIBUTING.md](CONTRIBUTING.md).
 - Update 2.2.1 and all four add-on content packs, including Future Redeemed
 - XC3-Setup: builds the game from your own NSP files and `prod.keys`
 - In-game settings menu (F1) and performance overlay (F10)
+- Cheats: the settings menu's Cheats tab switches a set of code patches while the game runs, without a restart and
+  without touching a save ([docs/cheats.md](docs/cheats.md))
 - Keyboard, mouse and gamepad, with Xbox or PlayStation button prompts
 - 60 fps and above (`fps_limit` up to 360 or the display's rate)
 - Any game resolution and aspect ratio, including ultrawide 21:9 and 32:9 (`output_res`, `ui_fit`)

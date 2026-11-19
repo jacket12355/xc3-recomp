@@ -268,3 +268,52 @@
 # takes longer than flight_spike_ms (0 to 60000).
 # flight = 0
 # flight_spike_ms = 100
+
+[cheats]
+# The settings menu's Cheats tab (F1) switches these while the game runs, without a restart and without touching a save.
+# docs/cheats.md lists the rows and the patches behind them. 1 is on, 0 off; a rate multiplies what its row does and
+# keeps its value while the row is off. The environment (XC3_CHEAT_MAP=1) overrides a line here.
+# Hold Y: the character moves speed_x times as fast. Default: 3.
+# speed_mult = 1
+# speed_x = 3
+# Hold B: a fall turns upward instead of landing.
+# moon_jump = 1
+# Attack damage times cheat_dmg_x, and the share of the damage the party takes in percent (100 is as the game ships).
+# cheat_dmg = 0
+# cheat_dmg_x = 2
+# cheat_dmg_taken = 100
+# Fall damage 1, chain attack gauge full, every art's gauge full and ready, no art cooldown.
+# cheat_fall_dmg = 0
+# cheat_chain = 0
+# cheat_arts_gauge = 0
+# cheat_no_cooldown = 0
+# XP times cheat_exp_x, SP 5x, affinity 5x, class rank times cheat_class_rank_x, class icon fill times
+# cheat_class_icon_x, the class rank cap 20, every Soul Hack slot complete, the class icon slots walk past a filled one,
+# the party's level compared with itself.
+# cheat_exp = 0
+# cheat_exp_x = 2
+# cheat_sp = 0
+# cheat_affinity = 0
+# cheat_class_rank = 0
+# cheat_class_rank_x = 2
+# cheat_class_icon = 0
+# cheat_class_icon_x = 2
+# cheat_class_asc = 0
+# cheat_soulhack = 0
+# cheat_fix_class = 0
+# cheat_ignore_lv = 0
+# The purse keeps its value, a Nopon coin counts 999, item gains 5x, a meal's timer times cheat_meal_x, items picked up
+# from cheat_pickup_x times the distance, no quest asks for items, any level at a rest spot.
+# cheat_money = 0
+# cheat_coins = 0
+# cheat_items = 0
+# cheat_meal = 0
+# cheat_meal_x = 3
+# cheat_pickup = 0
+# cheat_pickup_x = 3
+# cheat_quests = 0
+# cheat_any_lv = 0
+# Whole map open, unique monsters alive, every art and skill reachable.
+# cheat_map = 0
+# cheat_unique_mon = 0
+# cheat_arts = 0
