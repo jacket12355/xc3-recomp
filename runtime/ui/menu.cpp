@@ -24,6 +24,7 @@
 
 extern "C" {
 #include "cfg.h"
+#include "host.h"
 #include "input.h"
 #include "input_map.h"
 #include "ov.h"
@@ -304,7 +305,7 @@ extern "C" void menu_vk_release(void) {
 // XC3_MENU_TEST_SET=<frame>:<key>=<value>[,<key>=<value>...][;<frame>:...]: cfg_set of each key (XC3_ prefix
 // optional) at that presented frame; changes live settings with no input, menu open or not. xc3.ini is written only by
 // the pseudo-key SAVE=1 (cfg_save, as a row change does; a failed write shows the menu's save note).
-enum { TAB_SCREEN, TAB_GAME, TAB_SOUND, TAB_CONTROLS, TAB_MENU, TAB_ADVANCED, TAB_COUNT };
+enum { TAB_SCREEN, TAB_GAME, TAB_SOUND, TAB_CONTROLS, TAB_MENU, TAB_ADVANCED, TAB_CHEATS, TAB_COUNT };
 enum { TEST_PAGE_FRAMES = 30, TEST_SETS = 16 };
 struct TestSet { uint64_t frame; char key[64], value[64]; };
 static struct {
@@ -825,8 +826,82 @@ static void tab_advanced(float scale) {
     }
 }
 
+// "Turn every cheat off": every switch the page shows goes back to 0, and the damage taken share back to 100 %, the
+// value at which the damage site leaves the amount alone. The rates between the rows (speed, damage, exp ...) keep
+// their values, so a cheat switched on again has the multiplier it had. rt_patch_sync takes the change at the next
+// frame, the same as a row the player flips.
+static void cheats_off_all(void) {
+    static const char *const rows[] = {
+        "XC3_SPEED_MULT", "XC3_MOON_JUMP",
+        "XC3_CHEAT_DMG", "XC3_CHEAT_FALL_DMG", "XC3_CHEAT_CHAIN", "XC3_CHEAT_ARTS_GAUGE", "XC3_CHEAT_NO_COOLDOWN",
+        "XC3_CHEAT_EXP", "XC3_CHEAT_SP", "XC3_CHEAT_AFFINITY", "XC3_CHEAT_CLASS_RANK", "XC3_CHEAT_CLASS_ICON",
+        "XC3_CHEAT_CLASS_ASC", "XC3_CHEAT_SOULHACK", "XC3_CHEAT_FIX_CLASS", "XC3_CHEAT_IGNORE_LV",
+        "XC3_CHEAT_MONEY", "XC3_CHEAT_COINS", "XC3_CHEAT_ITEMS", "XC3_CHEAT_MEAL", "XC3_CHEAT_PICKUP",
+        "XC3_CHEAT_QUESTS", "XC3_CHEAT_ANY_LV",
+        "XC3_CHEAT_MAP", "XC3_CHEAT_UNIQUE_MON", "XC3_CHEAT_ARTS",
+    };
+    for (size_t i = 0; i < sizeof rows / sizeof rows[0]; i++) cfg_set(rows[i], "0");
+    cfg_set("XC3_CHEAT_DMG_TAKEN", "100");
+    opt_save_soon();
+}
+
+// The Cheats tab: the code patch sets of recomp/patches-upd.txt. A set's value at start is its cfg row (patches.c
+// rt_patches_init asks cfg_meta), and a changed row switches the set at once (rt_patch_switch): every patched site picks
+// the replacement instructions or the original ones when it runs, so no restart is needed.
+static void tab_cheats(float scale) {
+    opt_begin("##cheats", scale);
+    opt_text(UI_MENU_CHEATS_NOTE);
+    if (opt_button("##cheats_off", UI_MENU_CHEATS_OFF, UI_MENU_CHEATS_OFF_DESC)) cheats_off_all();
+
+    opt_group(UI_MENU_GROUP_MOVEMENT);
+    opt_toggle("XC3_SPEED_MULT", UI_MENU_SPEED_MULT, UI_MENU_SPEED_MULT_DESC);
+    opt_slider("XC3_SPEED_X", UI_MENU_SPEED_X, 1, 10, UI_MENU_SPEED_X_DESC, 0.5f, "%.1fx");
+    opt_toggle("XC3_MOON_JUMP", UI_MENU_MOON_JUMP, UI_MENU_MOON_JUMP_DESC);
+
+    opt_group(UI_MENU_GROUP_BATTLE);
+    opt_toggle("XC3_CHEAT_DMG", UI_MENU_DMG, UI_MENU_DMG_DESC);
+    opt_slider("XC3_CHEAT_DMG_X", UI_MENU_DMG_X, 1, 100, UI_MENU_DMG_X_DESC, 1, "%.0fx");
+    opt_slider("XC3_CHEAT_DMG_TAKEN", UI_MENU_DMG_TAKEN, 0, 100, UI_MENU_DMG_TAKEN_DESC, 5, "%.0f %%");
+    opt_toggle("XC3_CHEAT_FALL_DMG", UI_MENU_FALL_DMG, UI_MENU_FALL_DMG_DESC);
+    opt_toggle("XC3_CHEAT_CHAIN", UI_MENU_CHAIN, UI_MENU_CHAIN_DESC);
+    opt_toggle("XC3_CHEAT_ARTS_GAUGE", UI_MENU_ARTS_GAUGE, UI_MENU_ARTS_GAUGE_DESC);
+    opt_toggle("XC3_CHEAT_NO_COOLDOWN", UI_MENU_NO_COOLDOWN, UI_MENU_NO_COOLDOWN_DESC);
+
+    opt_group(UI_MENU_GROUP_PROGRESS);
+    opt_toggle("XC3_CHEAT_EXP", UI_MENU_EXP, UI_MENU_EXP_DESC);
+    opt_slider("XC3_CHEAT_EXP_X", UI_MENU_EXP_X, 1, 20, UI_MENU_EXP_X_DESC, 1, "%.0fx");
+    opt_toggle("XC3_CHEAT_SP", UI_MENU_SP, UI_MENU_SP_DESC);
+    opt_toggle("XC3_CHEAT_AFFINITY", UI_MENU_AFFINITY, UI_MENU_AFFINITY_DESC);
+    opt_toggle("XC3_CHEAT_CLASS_RANK", UI_MENU_CLASS_RANK, UI_MENU_CLASS_RANK_DESC);
+    opt_slider("XC3_CHEAT_CLASS_RANK_X", UI_MENU_CLASS_RANK_X, 1, 20, UI_MENU_CLASS_RANK_X_DESC, 1, "%.0fx");
+    opt_toggle("XC3_CHEAT_CLASS_ICON", UI_MENU_CLASS_ICON, UI_MENU_CLASS_ICON_DESC);
+    opt_slider("XC3_CHEAT_CLASS_ICON_X", UI_MENU_CLASS_ICON_X, 1, 20, UI_MENU_CLASS_ICON_X_DESC, 1, "%.0fx");
+    opt_toggle("XC3_CHEAT_CLASS_ASC", UI_MENU_CLASS_ASC, UI_MENU_CLASS_ASC_DESC);
+    opt_toggle("XC3_CHEAT_SOULHACK", UI_MENU_SOULHACK, UI_MENU_SOULHACK_DESC);
+    opt_toggle("XC3_CHEAT_FIX_CLASS", UI_MENU_FIX_CLASS, UI_MENU_FIX_CLASS_DESC);
+    opt_toggle("XC3_CHEAT_IGNORE_LV", UI_MENU_IGNORE_LV, UI_MENU_IGNORE_LV_DESC);
+
+    opt_group(UI_MENU_GROUP_ITEMS);
+    opt_toggle("XC3_CHEAT_MONEY", UI_MENU_MONEY, UI_MENU_MONEY_DESC);
+    opt_toggle("XC3_CHEAT_COINS", UI_MENU_COINS, UI_MENU_COINS_DESC);
+    opt_toggle("XC3_CHEAT_ITEMS", UI_MENU_ITEMS, UI_MENU_ITEMS_DESC);
+    opt_toggle("XC3_CHEAT_MEAL", UI_MENU_MEAL, UI_MENU_MEAL_DESC);
+    opt_slider("XC3_CHEAT_MEAL_X", UI_MENU_MEAL_X, 1, 20, UI_MENU_MEAL_X_DESC, 1, "%.0fx");
+    opt_toggle("XC3_CHEAT_PICKUP", UI_MENU_PICKUP, UI_MENU_PICKUP_DESC);
+    opt_slider("XC3_CHEAT_PICKUP_X", UI_MENU_PICKUP_X, 1, 100, UI_MENU_PICKUP_X_DESC, 1, "%.0fx");
+    opt_toggle("XC3_CHEAT_QUESTS", UI_MENU_QUESTS, UI_MENU_QUESTS_DESC);
+    opt_toggle("XC3_CHEAT_ANY_LV", UI_MENU_ANY_LV, UI_MENU_ANY_LV_DESC);
+
+    opt_group(UI_MENU_GROUP_WORLD);
+    opt_toggle("XC3_CHEAT_MAP", UI_MENU_MAP, UI_MENU_MAP_DESC);
+    opt_toggle("XC3_CHEAT_UNIQUE_MON", UI_MENU_UNIQUE_MON, UI_MENU_UNIQUE_MON_DESC);
+    opt_toggle("XC3_CHEAT_ARTS", UI_MENU_ARTS, UI_MENU_ARTS_DESC);
+    opt_end();
+}
+
 static const UiTextId kTabNames[TAB_COUNT] = {UI_MENU_TAB_SCREEN, UI_MENU_TAB_GAME, UI_MENU_TAB_SOUND,
-                                              UI_MENU_TAB_CONTROLS, UI_MENU_TAB_MENU, UI_MENU_TAB_ADVANCED};
+                                              UI_MENU_TAB_CONTROLS, UI_MENU_TAB_MENU, UI_MENU_TAB_ADVANCED,
+                                              UI_MENU_TAB_CHEATS};
 static int g_tab;               // the tab shown
 static int g_tab_request = -1;  // select this tab at the next layout; -1 none
 static int g_focus_page = -1;   // this tab's first row takes the cursor once it is shown; -1 none
@@ -834,6 +909,7 @@ static int g_focus_page = -1;   // this tab's first row takes the cursor once it
 // ---- the window: title, tabs (L / R or Q / E switch), the page, and the bottom row with "Continue" and "Quit game".
 // B on the gamepad and Esc close it.
 static void layout_menu(uint32_t w, uint32_t h, float scale) {
+    rt_patch_sync();   // a Cheats row that changed this frame reaches its sites now (patches.c sets_from_cfg)
     ImGui::GetBackgroundDrawList()->AddRectFilled(ImVec2(0, 0), ImVec2((float)w, (float)h), IM_COL32(0, 0, 0, 120));
     float ww = fminf(w * 0.88f, 1400 * scale), wh = fminf(h * 0.86f, 820 * scale);
     ImGui::SetNextWindowPos(ImVec2(w * 0.5f, h * 0.5f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
@@ -865,7 +941,9 @@ static void layout_menu(uint32_t w, uint32_t h, float scale) {
             if (!ImGui::BeginTabItem(label, nullptr, g_tab_request == k ? ImGuiTabItemFlags_SetSelected : 0)) continue;
             g_tab = k;
             if (g_focus_page == k) {
-                opt_focus_first();
+                // the Cheats page opens on its first cheat, not on the "turn every cheat off" button above it
+                if (k == TAB_CHEATS) opt_focus_key("XC3_SPEED_MULT");
+                else opt_focus_first();
                 g_focus_page = -1;
             }
             ImGui::Spacing();
@@ -880,6 +958,7 @@ static void layout_menu(uint32_t w, uint32_t h, float scale) {
             case TAB_CONTROLS: tab_controls(scale); break;
             case TAB_MENU: tab_menu(scale); break;
             case TAB_ADVANCED: tab_advanced(scale); break;
+            case TAB_CHEATS: tab_cheats(scale); break;
             }
             ImGui::EndTabItem();
         }
