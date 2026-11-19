@@ -4,8 +4,7 @@
 > **This is a fork of [jmars125/xc3-recomp](https://github.com/jmars125/xc3-recomp).** It adds a Cheats tab to the
 > settings menu: 27 rows that switch code patches while the game runs, taken from the Xenoblade Chronicles 3 2.2.0
 > cheat table of Sodamyte and Eiffel2018. The rest is upstream's work, unchanged. Upstream's installers do not have
-> the tab, and this fork publishes source only for now: [docs/building.md](docs/building.md) builds it from your own
-> game files.
+> the tab; this fork builds its own package and publishes it on [Releases](../../releases/latest).
 
 **XC3 Recomp** is a static recompilation of *Xenoblade Chronicles 3* (Nintendo Switch, 2022) into a native Windows x86-64 application ([docs/architecture.md](docs/architecture.md)). It is a fork of [XCX Recomp](https://github.com/jmars125/xcx-recomp), itself a fork of [TotK Recomp](https://github.com/valentderah/totk-pc-recomp) by Valiantsin Dzerakh.
 
@@ -98,9 +97,6 @@ the NVIDIA (Streamline, DLSS) and AMD (FidelityFX) libraries next to `xc3.exe`.
 - Linux and the Steam Deck tested on real hardware
 
 ## Installing
-
-No package is published for this fork: build it from your own game files with [docs/building.md](docs/building.md).
-The steps below are upstream's installer, which is what a release of this fork would carry.
 
 Requirements: Windows 10 or later, an x86-64 CPU with SSE4.2 (AVX2 runs it a little faster; without it the setup compiles for older CPUs), a GPU with Vulkan 1.3 and `VK_EXT_external_memory_host`, about 36 GiB free during setup (20 GiB after). DLSS needs an NVIDIA RTX card; DLSS Frame Generation an RTX 40 or 50 card with hardware-accelerated GPU scheduling on.
 
