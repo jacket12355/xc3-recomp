@@ -50,7 +50,7 @@ writes it like any other setting, and the environment (`XC3_CHEAT_MAP=1`, say) o
 
 The Cheats tab has one row per set, in five groups: Movement, Battle, Progress, Items, World. A toggle is on while its
 `xc3.ini` key is not 0; a rate row (`speed_x`, `cheat_dmg_x`, `cheat_exp_x`, …) multiplies what its cheat does. The
-last row of the page, *Turn every cheat off*, sets every switch back to 0 and the damage share back to 100 %, leaving
+first row of the page, *Turn every cheat off*, sets every switch back to 0 and the damage share back to 100 %, leaving
 the rates as they are.
 
 | Row | `xc3.ini` key | What it does |

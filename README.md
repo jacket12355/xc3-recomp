@@ -1,11 +1,51 @@
 # XC3 Recomp
 
+> [!NOTE]
+> **This is a fork of [jmars125/xc3-recomp](https://github.com/jmars125/xc3-recomp).** It adds a Cheats tab to the
+> settings menu: 27 rows that switch code patches while the game runs, taken from the Xenoblade Chronicles 3 2.2.0
+> cheat table of Sodamyte and Eiffel2018. The rest is upstream's work, unchanged. Upstream's installers do not have
+> the tab, and this fork publishes source only for now: [docs/building.md](docs/building.md) builds it from your own
+> game files.
+
 **XC3 Recomp** is a static recompilation of *Xenoblade Chronicles 3* (Nintendo Switch, 2022) into a native Windows x86-64 application ([docs/architecture.md](docs/architecture.md)). It is a fork of [XCX Recomp](https://github.com/jmars125/xcx-recomp), itself a fork of [TotK Recomp](https://github.com/valentderah/totk-pc-recomp) by Valiantsin Dzerakh.
 
 > [!IMPORTANT]
 > **No game files are included.** You need your own legally obtained copy of *Xenoblade Chronicles 3*, dumped from your own console: the base game and the 2.2.1 update (the add-on content is optional). Instructions for obtaining those files will not be provided.
 >
 > The game is built from your files on your machine, so the result contains the game. It is for your own use. Do not share it.
+
+## Cheats in this fork
+
+![The Cheats tab in the settings menu](docs/img/cheats-page.png)
+
+F1 → *Cheats* has 27 cheats in five groups, and one takes effect the moment it is switched: no restart, and no save is
+touched. The first row of the page turns every cheat off at once.
+
+- **Movement** — hold Y: movement `speed_x` times as fast (1x to 10x); hold B: a fall turns upward instead of landing.
+- **Battle** — damage dealt `cheat_dmg_x` times; the share of damage taken, 100 % to 0 %; fall damage 1; chain attack
+  gauge; arts gauge, the Talent Art's and the three party arts'; no art cooldown.
+- **Progress** — XP `cheat_exp_x` times, SP 5 times, affinity 5 times, class rank and class icon fill `_x` times,
+  ascension, Soul Hack, the class icon fix, ignore level difference.
+- **Items** — money never drops when something is bought, Nopon coins count 999, item gain 5 times, meals last
+  `cheat_meal_x` times as long, pickup distance `cheat_pickup_x` times, quests need no items, any level at a rest spot.
+- **World** — whole map open, unique monsters alive again, every art and skill.
+
+Every row is an `xc3.ini` key as well, so a choice survives between runs and the environment can set it from outside.
+
+**Why it is not a cheat table.** The game is a static recompilation, so the addresses a table holds are gone by the time
+it runs and there is no instruction word to write. The cheats are part of the build instead: `recomp/patches-upd.txt`
+names the instruction to replace, and the generator emits both paths, the replacement while the row is on and the
+original while it is off, which is what lets a row switch at run time. [docs/cheats.md](docs/cheats.md) has the
+mechanism, the limits of a site and the steps for adding a row.
+
+**Where the codes come from.** The 2.2.0 table of Sodamyte and Eiffel2018 for Ryujinx, build id `82D187FE9EF9BE92`,
+the same `main` this tree lifts. No code from that table is copied: each site re-derives its hook as a build-time
+patch. Four of its rows are not ported (Ouroboros heat, quest locking, Art of Flow, Colony Iota), and none of them has
+a row in the menu, so nothing is offered that does not work.
+
+A game update moves every site. `tools/cheatkit/update.py --install` relocates them by signature, regenerates and
+rebuilds ([tools/cheatkit/README.md](tools/cheatkit/README.md)); a site whose original instruction no longer matches
+stops the build instead of patching the wrong one.
 
 ## Status
 
@@ -59,6 +99,9 @@ the NVIDIA (Streamline, DLSS) and AMD (FidelityFX) libraries next to `xc3.exe`.
 
 ## Installing
 
+No package is published for this fork: build it from your own game files with [docs/building.md](docs/building.md).
+The steps below are upstream's installer, which is what a release of this fork would carry.
+
 Requirements: Windows 10 or later, an x86-64 CPU with SSE4.2 (AVX2 runs it a little faster; without it the setup compiles for older CPUs), a GPU with Vulkan 1.3 and `VK_EXT_external_memory_host`, about 36 GiB free during setup (20 GiB after). DLSS needs an NVIDIA RTX card; DLSS Frame Generation an RTX 40 or 50 card with hardware-accelerated GPU scheduling on.
 
 1. Download `XC3-Setup-<version>-windows.zip` from [Releases](../../releases/latest) and unpack it.
@@ -83,6 +126,7 @@ XC3 Recomp builds on the projects below. What was taken from each, with its lice
 - [hactool](https://github.com/SciresM/hactool)
 - [SDL 3](https://libsdl.org), [Dear ImGui](https://github.com/ocornut/imgui), [AMD FSR 1](https://github.com/GPUOpen-Effects/FidelityFX-FSR), [AMD FidelityFX SDK (FSR 3)](https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK), [NVIDIA Streamline (DLSS)](https://github.com/NVIDIA-RTX/Streamline), [Vulkan Memory Allocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator), [libopus](https://opus-codec.org), [libvpx](https://chromium.googlesource.com/webm/libvpx), [Zstandard](https://github.com/facebook/zstd)
 - The [60FPS mod for XC3 1.0.1](https://github.com/Fl4sh9174/Switch-Emulator-Ultrawide-FPS-Mods) by Fl4sh_ and StevensND
+- The Xenoblade Chronicles 3 2.2.0 cheat table of Sodamyte and Eiffel2018, whose hooks the Cheats tab re-derives as build-time patches
 - [Switchbrew](https://switchbrew.org) and the Switch homebrew community
 
 ## License
