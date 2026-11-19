@@ -269,6 +269,8 @@ int rt_patch_set(const char *name);                        // index of a set of 
 int rt_patch_enabled(int set);                             // the set is on (0 for -1)
 void rt_patch_disable(int set);                            // before the guest starts: a set needs another that is off
 void rt_patch_switch(int set, int on);                     // at run time (live settings): each site takes the new code
+void rt_patch_sync(void);                                  // every set that has a settings row takes that row's value;
+                                                           // patches.c calls it once a frame (the Cheats page)
                                                            // the next time it runs
 void *rt_patch_page(void);                                 // the page the patched code reads (NULL without the table)
 void tour_init(void);                                      // tour.c: XC3_TOUR, before hostfn_seal

@@ -123,3 +123,201 @@ site orbs main 493d50 91000508 cb480d08 91000508
 # for a media with no archive, and the game reads the mod's file from rom: with its own size.
 set modfiles XC3_MOD_ARCHIVE 1
 site modfiles main 12577b8 d37df129 d37df129 @call:f20
+
+# speed (XC3_SPEED_MULT, patches.c host_speed): the character's move speed. main+0xb44dac is the fmul that applies a
+# move's own factor (s8) to its speed (s1); the site calls patches.c host_speed in its place, which makes the same
+# product times 3 while Y is held (XC3_SPEED_X takes another factor). Address from the 2.2.0 cheats of Sodamyte and
+# Eiffel2018, whose build id is this main's (82D187FE9EF9BE92): 8b Movement Speed (hold Y=3X).
+set speed XC3_SPEED_MULT 1
+site speed main b44dac 1e280821 @call:f30
+
+# moonjump (XC3_MOON_JUMP, patches.c host_moon): while B is held the character keeps rising where it would fall.
+# main+0xb47d8c stores lane 2 of v0 in a character's fall and serves every character, so host_moon looks the player's
+# up as the cheat does and turns the fall's downward speed into 0.4 upward. Same source: 9. Moon Jump (Hold B).
+set moonjump XC3_MOON_JUMP 1
+site moonjump main b47d8c 4d008100 @call:f40
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Cheats ported from the community cheat file for 2.2.0 (Sodamyte & Eiffel2018). Each set is one entry of the Cheats
+# page. These are the ones the original does with plain instruction replacement: the site runs a constant, a nop, or a
+# load of a constant, in place of the original instruction. Nothing here branches, so the set only changes what the one
+# instruction computes. Numbers in brackets are the cheat file's section numbers.
+
+# [15] money (XC3_CHEAT_MONEY): the spend (main+0xa86f58: w8 = [x19+0x38c4] - the price) stores its result at
+# +0x38c4; the store is dropped, so the purse keeps its value. The second site is the price getter's caller
+# (main+0x2fa728: w21 = the amount) and makes the amount 0, which also keeps every other deduction path from spending.
+set money XC3_CHEAT_MONEY 0
+site money main a86f60 b938c668 d503201f
+site money main 2fa728 2a0103f5 2a1f03f5
+
+# [16] sp (XC3_CHEAT_SP): the SP gain (main+0x2e4910: w8 = w8 + w1, the cap and clamp follow) adds the gain four times
+# (add w8, w8, w1, lsl #2).
+set sp XC3_CHEAT_SP 0
+site sp main 2e4910 0b010108 0b010908
+
+# [22] ignorelv (XC3_CHEAT_IGNORE_LV): the XP path compares the party's level (main+0x1edd78: w8 = [x28+0xc]) with the
+# enemy's ([x23+9]); the site loads the party level in place of the enemy's, so the difference is always 0 and XP and
+# class XP are never reduced.
+set ignorelv XC3_CHEAT_IGNORE_LV 0
+site ignorelv main 1edd7c 394026e9 2a0803e9
+
+# [24] quests (XC3_CHEAT_QUESTS): the item check a quest makes (main+0xa29ce4) is dropped, the count it returns
+# (main+0x59fc18) becomes 99, and the quest's own item test (main+0x6138a8) is dropped, so no quest asks for items.
+set quests XC3_CHEAT_QUESTS 0
+site quests main a29ce4 97e30af5 d503201f
+site quests main 59fc18 1a8833e0 52800c60
+site quests main 6138a8 97f35f70 d503201f
+
+# [25] anylv (XC3_CHEAT_ANY_LV): the rest spot's level change (main+0x725e00 reads a flag at [x20+0x25], main+0x8fbbc0
+# asks whether the level is allowed, main+0x725e24 asks for the level cap) reads the flag as set, the check as
+# allowed, and the cap as 99.
+set anylv XC3_CHEAT_ANY_LV 0
+site anylv main 725e00 39409688 52800028
+site anylv main 8fbbc0 97f53444 52800020
+site anylv main 725e24 97efae0c 52800c60
+
+# [26] arts (XC3_CHEAT_ARTS): the list walks of the arts and skills a character has all skip an entry when a test says
+# so: main+0x2f5094 / +0x2f5120 / +0x2f51a8 hold a b.ne after cmp w9, w8, +0x2f5138 / +0x2f51c0 a b.hi after cmp w8, #1,
+# and +0x2f369c / +0x2f3784 a b.ne after cmp w8, #3. A site cannot replace a branch, so each patch replaces the cmp
+# before it: the first three compare a register with itself (always equal), the two b.hi compare against 0xff (a state
+# value is never that), and the b.ne ones compare against themselves (always equal). A walk then reaches every entry
+# instead of only the learned ones. Nothing reads the flags after these branches.
+set arts XC3_CHEAT_ARTS 0
+site arts main 2f5090 6b08013f 6b09013f
+site arts main 2f511c 6b08013f 6b09013f
+site arts main 2f5134 7100051f 7103fd1f
+site arts main 2f51a4 6b08013f 6b09013f
+site arts main 2f51bc 7100051f 7103fd1f
+site arts main 2f3698 71000d1f 6b08011f
+site arts main 2f3780 71000d1f 6b08011f
+
+# [27] soulhack (XC3_CHEAT_SOULHACK): the Soul Hack art or skill slot read (main+0x2d0c1c, and +0x2d0d40 which tests it
+# against -1) reads -1, the id of the empty slot, so every slot counts as complete.
+#
+# main+0x2d0c1c is the item count read of the inventory table, so the site belongs to a set that is always on and the
+# host applies the row while it is switched on (patches.c: host_slot). With the row off the host loads the count
+# exactly as the replaced instruction did.
+set slots XC3_SLOTS 1
+site slots main 2d0c1c b8696900 b8696900 @call:fc0
+
+set soulhack XC3_CHEAT_SOULHACK 0
+site soulhack main 2d0d40 b8696908 12800008
+
+# [28] map (XC3_CHEAT_MAP): the region's map-open test (main+0x3036f4 returns whether the region is known) returns 1,
+# and execution leaves at once. The cheat file's second word is a ret; a site cannot emit one (only ops, and a bl as
+# the last word), so the argument is zeroed instead: the subs at main+0x3036fc then underflows and its b.lo takes the
+# branch to the function's own ret at main+0x303774. Falling through instead (a nop) ran the rest of the function with
+# x8 never set, which is what crashed the game.
+set map XC3_CHEAT_MAP 0
+site map main 3036f4 aa0003e8 52800020
+site map main 3036f8 2a1f03e0 52800001
+
+# [29] uniquemon (XC3_CHEAT_UNIQUE_MON): the unique monster's alive flag (main+0x2e049c) reads 1, so every unique
+# monster counts as defeated and its grave exists.
+set uniquemon XC3_CHEAT_UNIQUE_MON 0
+site uniquemon main 2e049c 38696908 52800028
+
+# [31] fixclass (XC3_CHEAT_FIX_CLASS): three loops end when a class icon slot is already filled (a cbnz on the slot's
+# byte at main+0x1ee1dc, +0x1ee23c, +0x312304). The branches cannot be patched, so the byte they test is loaded as 0
+# instead, one instruction earlier (main+0x1ee1d8, +0x1ee238, +0x312300): the loop then walks past a filled slot
+# instead of ending. Nothing reads that register after the branch. The cheat file labels this a fix, not a cheat.
+set fixclass XC3_CHEAT_FIX_CLASS 0
+site fixclass main 1ee1d8 39400289 52800009
+site fixclass main 1ee238 3940010b 5280000b
+site fixclass main 312300 39405908 52800008
+
+# [6] classasc (XC3_CHEAT_CLASS_ASC): the class ascension cap. The rank cap (main+0x312158 picks 20 or 10 by a flag,
+# main+0x635abc tests the flag) is 20, the flag is written as 1 at main+0x635ab8 before the test reads it, and the
+# second constant (main+0x635ab4) becomes 1, the value the test compares.
+set classasc XC3_CHEAT_CLASS_ASC 0
+site classasc main 312158 1a88013b 5280029b
+site classasc main 635ab4 52800149 52800029
+site classasc main 635ab8 39406108 39006109
+site classasc main 635abc 7200011f 7200013f
+
+# [2a-e] dmg (XC3_CHEAT_DMG, XC3_CHEAT_DMG_TAKEN): the amount of damage an attack applies sits in w20, which the lifter
+# keeps in a C variable, so a host call cannot set it; the second site scales it with plain instructions instead. The
+# first site loads what the original loaded and decides the scale: damage the party deals is multiplied by the row's
+# rate, damage the party takes is multiplied by the "damage taken" share (the cheat table divides it by 2^n at this
+# same instruction; a share over 100 is the same thing without the power-of-two steps). Both are carried as a numerator
+# and a denominator in the patch page, so one site serves both: w20 = w20 * num / den. The table's own split: the byte
+# at [x0+0x1e] set with bit 0 of [x22+0x5a] clear is damage the party takes; that byte clear with the bit clear is
+# damage the party deals; with the bit set neither applies.
+#
+# The set is always on and the two rows are read by the host, because one instruction serves both rows: with both off
+# the host leaves 1/1 in the page and the scaling is exact.
+set dmg XC3_DMG_ANY 1
+set dmgdeal XC3_CHEAT_DMG 0
+set dmgtake XC3_CHEAT_DMG_TAKEN 0
+site dmg main 1d9638 b9401408 b9401408 @page:x10 f9070540 @call:fd0
+# the denominator is loaded first: the numerator's load writes w9, the page register itself, so it has to be the last
+# one to use that base.
+site dmg main 1d963c b9001268 b9001268 @page:x9 b94e0d2a b94e0129 1b097e94 1aca0e94
+
+# [21] coins (XC3_CHEAT_COINS): the count the purse adds for a Nopon coin (main+0x2eb780 reads an entry's count while
+# the 3200 byte item table is walked; the id the walk wants is w19, and the entry's own id, which the compare just
+# before this load tested, is the halfword at [x8-14]) reads 999 for the two coin ids 0x3eda and 0x3edb, and the
+# deduction a purchase makes (the call at main+0x5a4200) is dropped, so the purse shows 999 and spending never lowers
+# it. The host reads the entry's id from memory rather than being handed w19: w19 lives in a C variable at the site.
+set coins XC3_CHEAT_COINS 0
+site coins main 2eb780 785fe10a @call:e10
+site coins main 5a4200 97f521ae d503201f
+
+# [10] falldmg (XC3_CHEAT_FALL_DMG): the fall damage amount (main+0xb786bc converts the fall's height to an int) is 1.
+set falldmg XC3_CHEAT_FALL_DMG 0
+site falldmg main b786bc 1e390008 52800028
+
+# [13] chain (XC3_CHEAT_CHAIN): the chain attack gauge (main+0x19c14c loads the gauge at [x19+0x4d4]) loads the cap
+# (s9, which the caller passed) instead, so the gauge reads full.
+set chain XC3_CHEAT_CHAIN 0
+site chain main 19c14c bd44d660 1e204120
+
+# ---------------------------------------------------------------------------------------------------------------------
+# The same table's sites that need more than one instruction: each calls a host function (patches.c) that does what the
+# instruction did and then applies the cheat. A rate comes from the row that holds it, so a slider sets it.
+
+# [12] artsgauge (XC3_CHEAT_ARTS_GAUGE): every art's gauge reads 1.0, a full gauge, and the art object itself is set to
+# it, so the art can be used and not only drawn as ready. Two widgets read a gauge: the Talent Art's own (main+0x237e18,
+# a host, patches.c: host_arts_gauge) and the three party arts of the battle palette (main+0x23a370, through the shared
+# slot builder at main+0x23a2a4). The second needs no host: the load, a constant, and the store back are enough, and the
+# slot builder runs for each of the three arts, so one site covers all of them.
+set artsgauge XC3_CHEAT_ARTS_GAUGE 0
+site artsgauge main 237e18 bd4012e0 @call:f50
+site artsgauge main 23a370 bd401261 1e2e1001 bd001261
+
+# [11] nocooldown (XC3_CHEAT_NO_COOLDOWN): the gauge store of a used art (main+0x1947a8) leaves the gauge of a party art
+# as it is, so an art that was full stays full (the cheat table's injection skips this very store for the party's art
+# objects, those whose type at [[x19]-0x28] & 0xfff is 0xbc0). Other objects get the value the store would have written.
+set nocooldown XC3_CHEAT_NO_COOLDOWN 0
+site nocooldown main 1947a8 bd001268 @call:f60
+
+# [20] meal (XC3_CHEAT_MEAL): the meal effect timer (main+0x30a7a8) times the rate.
+set meal XC3_CHEAT_MEAL 0
+site meal main 30a7a8 1e230100 @call:f70
+
+# [7] pickup (XC3_CHEAT_PICKUP): the distance items are picked up from (main+0xb22244) times the rate.
+set pickup XC3_CHEAT_PICKUP 0
+site pickup main b22244 bd4a72a8 @call:f80
+
+# [3] exp (XC3_CHEAT_EXP): the XP award (main+0x1ed984 makes the value's address) times the rate.
+set exp XC3_CHEAT_EXP 0
+site exp main 1ed984 8b08037c @call:f90
+
+# [4] classrank (XC3_CHEAT_CLASS_RANK): the class rank gain (main+0x1ed988) times the rate.
+set classrank XC3_CHEAT_CLASS_RANK 0
+site classrank main 1ed988 f81cc3a9 @call:fa0
+
+# [5] classicon (XC3_CHEAT_CLASS_ICON): the class icon's fill (main+0x1ed998) times the rate.
+set classicon XC3_CHEAT_CLASS_ICON 0
+site classicon main 1ed998 2a1f03f3 @call:fb0
+
+# [18] affinity (XC3_CHEAT_AFFINITY): the affinity points a task gives (main+0x304e28 was mov w20, w2) are added to
+# themselves four times (add w20, w2, w2, lsl #2), i.e. 5x. The site writes w20, which the lifted C keeps in a local,
+# so a host call cannot set it; a single instruction can.
+set affinity XC3_CHEAT_AFFINITY 0
+site affinity main 304e28 2a0203f4 0b020854
+
+# [19] items (XC3_CHEAT_ITEMS): the items, coins, ether or money a source gives (main+0x2ec13c was mov w19, w2) is
+# 5x the same way (add w19, w2, w2, lsl #2).
+set items XC3_CHEAT_ITEMS 0
+site items main 2ec13c 2a0203f3 0b020853
