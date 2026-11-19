@@ -1,0 +1,52 @@
+# Builds the Windows release package of this fork on a runner, so a package can be published without the local
+# toolchain of docs/building.md. Same steps as the `windows` job of release.yml, which only fires on a tag matching
+# v<major>.<minor>.<patch> and on a push to master; a fork has neither.
+#
+# The package carries no game data: it is the setup that builds the game from the player's own files. Game-derived
+# folders (generated/, build/extracted/) are never present on a runner, so --prove cannot run here.
+name: Fork package
+
+on:
+  push:
+    branches:
+      - cheats
+    paths:
+      - ".github/workflows/fork-package.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-2025
+    timeout-minutes: 120
+    env:
+      PACKAGE: XC3-Setup-0.2.18-cheats.1-windows.zip
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "10.0.x"
+      - run: python -m pip install uv==0.12.5
+      - uses: actions/cache@v6
+        with:
+          path: toolchain/release-dl
+          key: release-dl-${{ runner.os }}-${{ hashFiles('tools/make_release.py', 'tools/make_release_linux.py') }}
+          restore-keys: release-dl-${{ runner.os }}-
+      - uses: ./.github/actions/software-vulkan
+      - name: MSYS2 gcc and make for hactool
+        run: C:\msys64\usr\bin\bash.exe -lc "pacman -Sy --noconfirm --needed make mingw-w64-ucrt-x86_64-gcc"
+      - run: python tools/build_hactool.py
+      - run: python tools/build_xlate.py
+      - run: python tools/make_release.py --out build/release/XC3-Setup --zip build/release/${{ env.PACKAGE }}
+      - run: python tools/check_release.py build/release/${{ env.PACKAGE }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.PACKAGE }}
+          path: build/release/${{ env.PACKAGE }}
+          if-no-files-found: error
+          retention-days: 7
