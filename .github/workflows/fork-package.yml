@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write   # the last step attaches the package to the release
 
 jobs:
   windows:
@@ -23,6 +23,7 @@ jobs:
     timeout-minutes: 120
     env:
       PACKAGE: XC3-Setup-0.2.18-cheats.1-windows.zip
+      RELEASE_TAG: v0.2.18-cheats.1   # bump with PACKAGE for the next release; empty to build only
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -50,3 +51,11 @@ jobs:
           path: build/release/${{ env.PACKAGE }}
           if-no-files-found: error
           retention-days: 7
+      # Kept as an artifact as well, so a build with RELEASE_TAG empty is still usable.
+      - name: Attach the package to the release
+        if: env.RELEASE_TAG != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: gh release upload "$RELEASE_TAG" "build/release/${{ env.PACKAGE }}" --clobber
