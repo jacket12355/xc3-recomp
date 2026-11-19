@@ -45,6 +45,15 @@ jobs:
       - run: python tools/build_xlate.py
       - run: python tools/make_release.py --out build/release/XC3-Setup --zip build/release/${{ env.PACKAGE }}
       - run: python tools/check_release.py build/release/${{ env.PACKAGE }}
+      # libxc3rt.a in the package has to be built from this tree's runtime-src/: an official one would install a game
+      # without the tab, which is what --runtime-lib does when it is given the wrong archive.
+      - name: The runtime in the package is this fork's
+        shell: bash
+        run: |
+          for lib in build/release/XC3-Setup/runtime/libxc3rt.a build/release/XC3-Setup/runtime/libxc3rt-v2.a; do
+            grep -q "Turn every cheat off" "$lib" || { echo "::error::$lib has no Cheats tab"; exit 1; }
+            echo "$lib carries the Cheats tab"
+          done
       - uses: actions/upload-artifact@v7
         with:
           name: ${{ env.PACKAGE }}
