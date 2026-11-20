@@ -64,7 +64,7 @@ the rates as they are.
 | Arts gauge full | `cheat_arts_gauge` | Every art's gauge, the Talent Art's and the three party arts', reads full, and the art itself is set to it, so it can be used and not only drawn as ready. |
 | No art cooldown | `cheat_no_cooldown` | A used art's gauge is left as it was, so the art is ready again at once. |
 | XP | `cheat_exp`, `cheat_exp_x` | The XP an award gives is made `cheat_exp_x` times. |
-| SP | `cheat_sp` | The SP a gain gives is 5 times. |
+| SP | `cheat_sp` | The SP a gain gives is 5 times. A skill learned still costs what it says: the row scales a gain, not a spend. |
 | Affinity | `cheat_affinity` | The affinity points a task gives are 5 times. |
 | Class rank | `cheat_class_rank`, `cheat_class_rank_x` | The class rank a gain gives is made `cheat_class_rank_x` times. |
 | Class icon | `cheat_class_icon`, `cheat_class_icon_x` | The class icon's fill is made `cheat_class_icon_x` times. |

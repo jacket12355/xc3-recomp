@@ -150,10 +150,14 @@ set money XC3_CHEAT_MONEY 0
 site money main a86f60 b938c668 d503201f
 site money main 2fa728 2a0103f5 2a1f03f5
 
-# [16] sp (XC3_CHEAT_SP): the SP gain (main+0x2e4910: w8 = w8 + w1, the cap and clamp follow) adds the gain four times
-# (add w8, w8, w1, lsl #2).
+# [16] sp (XC3_CHEAT_SP): the SP a gain gives is five times, and a spend costs what it says. main+0x2e4910 is the
+# generic add (`w8 = w8 + w1`, a cap at 9999 and a clamp at 0 follow) and a skill learned reaches it with a negative
+# delta, so the old `add w8, w8, w1, lsl #2` charged four times as much as well. The delta is added once as it
+# stands, then 4*w1 is added back only while w1 is positive (~(w1 >> 31) is all ones for a gain and 0 for a spend):
+# five times for a gain, once for a spend. No flags, so the cap and clamp are untouched; w10/w11 are scratch and
+# x9-x15 are caller-saved, so the callers keep nothing there across the call.
 set sp XC3_CHEAT_SP 0
-site sp main 2e4910 0b010108 0b010908
+site sp main 2e4910 0b010108 0b010108 531e742a 131f7c2b 0a2b014a 0b0a0108
 
 # [22] ignorelv (XC3_CHEAT_IGNORE_LV): the XP path compares the party's level (main+0x1edd78: w8 = [x28+0xc]) with the
 # enemy's ([x23+9]); the site loads the party level in place of the enemy's, so the difference is always 0 and XP and
