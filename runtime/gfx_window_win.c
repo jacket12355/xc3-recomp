@@ -30,6 +30,24 @@ static int g_fs_pending;                   // window thread: XC3_FULLSCREEN wait
 
 HWND gfx_window_handle(void) { return g_hwnd; }
 
+// ---- the display stays awake while the window is focused. This is a native window: nothing else in the process asks
+// Windows for anything, so the power plan's idle timers apply the way they do to any desktop application. They do not
+// always count play as input either — a gamepad reaches the game as raw HID reports — so on the defaults (screen off
+// after 30 minutes, sleep after 60) the screen went dark and the machine slept in the middle of a cutscene or a run
+// through a zone. ES_CONTINUOUS makes the request last on this thread until the next call, through the blocking
+// GetMessageW below, and it goes away with the thread. XC3_KEEP_AWAKE=0 restores the old behaviour; a background
+// window (test runs) never holds it, and neither does an unfocused one, so alt-tabbing out leaves the timers alone.
+static int g_awake;   // the last request, so repeated focus changes cost no call
+
+static void keep_awake(int on) {
+    if (on == g_awake) return;
+    int hold = on && !g_background && cfg_bool("XC3_KEEP_AWAKE");
+    EXECUTION_STATE prev;
+    g_awake = on;
+    prev = SetThreadExecutionState(hold ? ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_DISPLAY_REQUIRED : ES_CONTINUOUS);
+    rt_log("gfx: display stay-awake %s: previous state 0x%08lx", hold ? "held" : "released", (unsigned long)prev);
+}
+
 int gfx_window_vk_extensions(const char **out, int max) {
     if (max < 2) return 0;
     out[0] = VK_KHR_SURFACE_EXTENSION_NAME;
@@ -212,6 +230,7 @@ static LRESULT CALLBACK wnd_proc(HWND h, UINT m, WPARAM w, LPARAM l) {
         break;
     case WM_ACTIVATEAPP: {
         int in = w != 0;
+        keep_awake(in);
         gfx_window_focus_changed(in);
         if (in && g_fs_pending) {
             g_fs_pending = 0;
@@ -220,6 +239,7 @@ static LRESULT CALLBACK wnd_proc(HWND h, UINT m, WPARAM w, LPARAM l) {
         return 0;
     }
     case WM_CLOSE:
+        keep_awake(0);
         gfx_window_closed();
     case WM_ERASEBKGND:
         return 1;

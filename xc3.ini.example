@@ -114,6 +114,11 @@
 # here. Changes while the game runs take effect at once.
 # window_size = 1920x1080
 # fullscreen = 0
+# Hold the display, and the machine, awake while the window has focus (1, the default), or let the power plan's idle
+# timers run as they do for any other window (0). Worth keeping on where play reaches Windows as raw HID reports only
+# (a gamepad): the timers do not count those as input, so the screen would go dark and the machine sleep in the middle
+# of a cutscene. An unfocused window, and the background window of a test run, hold nothing.
+# keep_awake = 1
 # Variable refresh rate (G-SYNC, FreeSync, HDMI VRR): 1 presents each frame as it is ready, with vsync above the
 # monitor's range (immediate under DLSS Frame Generation, which brings its own pacing), in place of the presentation
 # setting, and holds the frame rate a little under the refresh rate (116 at 120 Hz), so frames stay inside the range.
