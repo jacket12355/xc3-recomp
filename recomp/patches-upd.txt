@@ -325,3 +325,12 @@ site affinity main 304e28 2a0203f4 0b020854
 # 5x the same way (add w19, w2, w2, lsl #2).
 set items XC3_CHEAT_ITEMS 0
 site items main 2ec13c 2a0203f3 0b020853
+
+# [23] classunlock (XC3_CHEAT_CLASS_UNLOCK): unlock every class the party has met. main+0x312330 loads a class icon's
+# fill (the u16 at the class entry's +0x14), main+0x312338 adds the class XP the battle gave and main+0x312340 clamps the
+# sum to the requirement main+0x312328 asked for; a fill that reaches it runs the game's own fill-complete path, which is
+# what unlocks the class. The site loads 0xffff in place of the fill, so the clamp puts it at the requirement at once and
+# the class unlocks on the next class XP award. The loop only walks the classes the character's class list holds: a hero
+# class whose hero has not joined is not in that list, so it is left alone.
+set classunlock XC3_CHEAT_CLASS_UNLOCK 0
+site classunlock main 312330 79402909 529fffe9

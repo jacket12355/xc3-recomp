@@ -293,8 +293,8 @@
 # cheat_arts_gauge = 0
 # cheat_no_cooldown = 0
 # XP times cheat_exp_x, SP 5x, affinity 5x, class rank times cheat_class_rank_x, class icon fill times
-# cheat_class_icon_x, the class rank cap 20, every Soul Hack slot complete, the class icon slots walk past a filled one,
-# the party's level compared with itself.
+# cheat_class_icon_x, the class rank cap 20, every class the party has met unlocks (cheat_class_unlock), every Soul Hack
+# slot complete, the class icon slots walk past a filled one, the party's level compared with itself.
 # cheat_exp = 0
 # cheat_exp_x = 2
 # cheat_sp = 0
@@ -304,6 +304,7 @@
 # cheat_class_icon = 0
 # cheat_class_icon_x = 2
 # cheat_class_asc = 0
+# cheat_class_unlock = 0
 # cheat_soulhack = 0
 # cheat_fix_class = 0
 # cheat_ignore_lv = 0

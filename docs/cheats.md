@@ -69,6 +69,7 @@ the rates as they are.
 | Class rank | `cheat_class_rank`, `cheat_class_rank_x` | The class rank a gain gives is made `cheat_class_rank_x` times. |
 | Class icon | `cheat_class_icon`, `cheat_class_icon_x` | The class icon's fill is made `cheat_class_icon_x` times. |
 | Class ascension | `cheat_class_asc` | The class rank cap is 20 whether the ascension has been done or not. |
+| Unlock every class | `cheat_class_unlock` | A class icon the party is filling fills in one go at the next battle, so every class the party has met unlocks. The fill loop walks the character's own class list, so a class of a hero the party has not met is not on it and stays locked. |
 | Soul Hack | `cheat_soulhack` | Every Soul Hack art and skill slot reads as complete. |
 | Class icon fix | `cheat_fix_class` | The loops that fill class icon slots walk past a filled slot instead of ending on it (the cheat file labels this a fix, not a cheat). |
 | Ignore level difference | `cheat_ignore_lv` | The XP path compares the party's level with itself, so a low party fights high enemies at full XP. |

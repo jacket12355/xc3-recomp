@@ -281,6 +281,10 @@ static const char *const text_en[UI_TEXT_COUNT] = {
     [UI_MENU_CLASS_ICON_X_DESC] = "How fast a locked class's icon fills.",
     [UI_MENU_CLASS_ASC] = "Class ascension at rank 20",
     [UI_MENU_CLASS_ASC_DESC] = "Every class keeps raising its rank past 10 up to 20, as the ascension quest opens.",
+    [UI_MENU_CLASS_UNLOCK] = "Unlock every class",
+    [UI_MENU_CLASS_UNLOCK_DESC] = "A class icon the party is filling fills in one go at the next battle, so the class "
+                                  "unlocks at once. A class of a hero the party has not met is not on the list and is "
+                                  "left alone.",
     [UI_MENU_SOULHACK] = "All Soul Hack arts and skills",
     [UI_MENU_SOULHACK_DESC] = "Every Soul Hack slot counts as complete, so its arts and skills can be learned.",
     [UI_MENU_FIX_CLASS] = "Class icon fills to 100%",

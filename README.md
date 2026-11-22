@@ -2,7 +2,7 @@
 
 > [!NOTE]
 > **This is a fork of [jmars125/xc3-recomp](https://github.com/jmars125/xc3-recomp).** It adds a Cheats tab to the
-> settings menu: 27 rows that switch code patches while the game runs, taken from the Xenoblade Chronicles 3 2.2.0
+> settings menu: 28 rows that switch code patches while the game runs, taken from the Xenoblade Chronicles 3 2.2.0
 > cheat table of Sodamyte and Eiffel2018. The rest is upstream's work, unchanged. Upstream's installers do not have
 > the tab; this fork builds its own package and publishes it on [Releases](../../releases/latest).
 
@@ -17,14 +17,15 @@
 
 ![The Cheats tab in the settings menu](docs/img/cheats-page.png)
 
-F1 → *Cheats* has 27 cheats in five groups, and one takes effect the moment it is switched: no restart, and no save is
+F1 → *Cheats* has 28 cheats in five groups, and one takes effect the moment it is switched: no restart, and no save is
 touched. The first row of the page turns every cheat off at once.
 
 - **Movement** — hold Y: movement `speed_x` times as fast (1x to 10x); hold B: a fall turns upward instead of landing.
 - **Battle** — damage dealt `cheat_dmg_x` times; the share of damage taken, 100 % to 0 %; fall damage 1; chain attack
   gauge; arts gauge, the Talent Art's and the three party arts'; no art cooldown.
 - **Progress** — XP `cheat_exp_x` times, SP 5 times, affinity 5 times, class rank and class icon fill `_x` times,
-  ascension, Soul Hack, the class icon fix, ignore level difference.
+  ascension, every class the party has met unlocked at the next battle, Soul Hack, the class icon fix, ignore level
+  difference.
 - **Items** — money never drops when something is bought, Nopon coins count 999, item gain 5 times, meals last
   `cheat_meal_x` times as long, pickup distance `cheat_pickup_x` times, quests need no items, any level at a rest spot.
 - **World** — whole map open, unique monsters alive again, every art and skill.
