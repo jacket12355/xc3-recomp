@@ -22,8 +22,8 @@ jobs:
     runs-on: windows-2025
     timeout-minutes: 120
     env:
-      PACKAGE: XC3-Setup-0.2.19-cheats.1-windows.zip
-      RELEASE_TAG: v0.2.19-cheats.1   # bump with PACKAGE for the next release; empty to build only
+      PACKAGE: XC3-Setup-0.2.19-cheats.2-windows.zip
+      RELEASE_TAG: v0.2.19-cheats.2   # bump with PACKAGE for the next release; empty to build only
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
